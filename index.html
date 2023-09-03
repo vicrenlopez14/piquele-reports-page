@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+      If you are serving your web app in a path other than the root, change the
+      href value below to reflect the base path you are serving from.
+
+      The path provided below has to start and end with a slash "/" in order for
+      it to work correctly.
+
+      For more details:
+      * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+      This is a placeholder for base href that will be replaced by the value of
+      the `--base-href` argument provided to `flutter build`.
+    -->
+    <base href="/">
+
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="description" content="Reports application for Piquele Mobile and Piquele Desktop.">
+
+    <!-- iOS meta tags & icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="piquele_reports">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png"/>
+
+    <title>Piquele Reports</title>
+    <link rel="manifest" href="manifest.json">
+
+    <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = "2383858378";
+
+    </script>
+    <!-- This script adds the flutter initialization JS code -->
+    <script src="flutter.js" defer></script>
+    <!--  <script src="pdfGenerator.js" type="module"></script>-->
+</head>
+<body>
+<script>
+    window.addEventListener('load', function(ev) {
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+
+</script>
+
+<script>
+    // Import the pdf-lib library
+import { PDFDocument, rgb } from 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.0/dist/pdf-lib.js';
+
+// Define a function to generate and download the PDF
+function generatePdfWithImage(imageBytes) {
+  // Create a new PDF document
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([612, 792]);
+
+  // Load the image bytes into a Uint8Array
+  const imageUint8Array = new Uint8Array(imageBytes);
+
+  // Embed the image into the PDF
+  const image = await pdfDoc.embedPng(imageUint8Array);
+  const imageDims = image.scale(0.5);
+
+  // Place the image on the page
+  page.drawImage(image, {
+    x: 100,
+    y: 400,
+    width: imageDims.width,
+    height: imageDims.height,
+  });
+
+  // Serialize the PDF document to bytes
+  const pdfBytes = await pdfDoc.save();
+
+  // Convert the PDF bytes to a Blob
+  const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+  // Create a download link and trigger the download
+  const downloadLink = document.createElement('a');
+  downloadLink.href = URL.createObjectURL(pdfBlob);
+  downloadLink.download = 'generated_pdf.pdf';
+  downloadLink.click();
+}
+
+</script>
+</body>
+</html>
